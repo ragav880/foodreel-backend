@@ -31,7 +31,7 @@ async function createFood(req,res){
 }
 
 async function getFoodItems(req,res){
-
+    console.log('getting food items')
     const foodItems = await foodModel.find({})
     return res.status(200).json({
         message:'food items fetched successfully',
