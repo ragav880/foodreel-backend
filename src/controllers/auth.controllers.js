@@ -61,12 +61,21 @@ async function loginUser(req,res){
             message:'invalid password or email'
         })
     }
+
+
      const token = jwt.sign({
         _id:user._id
     },process.env.JWT_SECRET)
     console.log('login user token',token)
     console.log('setting cookie')
-    await res.cookie('token',token)
+
+    res.cookie('token', token, {
+    httpOnly: true,
+    secure: true,
+    sameSite: 'none',
+    maxAge: 24 * 60 * 60 * 1000 // 1 day
+    });
+
     console.log('cookie set')
     res.status(200).json({
         message:'user logged in successfully',
