@@ -42,6 +42,7 @@ async function registerUser(req,res){
 }
 
 async function loginUser(req,res){
+    console.log('login user entered')
     const {email,password} = req.body
 
     const user = await userModel.findOne({
@@ -63,8 +64,10 @@ async function loginUser(req,res){
      const token = jwt.sign({
         _id:user._id
     },process.env.JWT_SECRET)
-
-    res.cookie('token',token)
+    console.log('login user token',token)
+    console.log('setting cookie')
+    await res.cookie('token',token)
+    console.log('cookie set')
     res.status(200).json({
         message:'user logged in successfully',
         user:{
