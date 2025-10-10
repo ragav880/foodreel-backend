@@ -30,17 +30,40 @@ async function createFood(req,res){
 
 }
 
-async function getFoodItems(req,res){
-    console.log('getting food items')
-    const foodItems = await foodModel.find({})
+async function getFoodItems(req, res) {
+  try {
+    console.log('getting food items');
+    const userId = req.user?._id; // available from your auth middleware
+
+    // Step 1: Get all foods
+    const foodItems = await foodModel.find({}).sort({ createdAt: -1 });
+
+    // Step 2: Get all foodIds liked by this user
+    let likedFoodIds = [];
+    if (userId) {
+      const likedFoods = await likeModel.find({ user: userId }).select('food');
+      likedFoodIds = likedFoods.map(like => like.food.toString());
+    }
+
+    // Step 3: Add likedByUser field to each item
+    const enrichedFoods = foodItems.map(food => ({
+      ...food._doc,
+      likedByUser: likedFoodIds.includes(food._id.toString())
+    }));
+
+    // Step 4: Set cache headers
     res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
     res.set('Pragma', 'no-cache');
     res.set('Expires', '0');
 
     return res.status(200).json({
-        message:'food items fetched successfully',
-        foodItems
-    })
+      message: 'Food items fetched successfully',
+      foodItems: enrichedFoods
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'Failed to fetch food items' });
+  }
 }
 
 
