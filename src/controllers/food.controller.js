@@ -33,6 +33,10 @@ async function createFood(req,res){
 async function getFoodItems(req,res){
     console.log('getting food items')
     const foodItems = await foodModel.find({})
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+    res.set('Pragma', 'no-cache');
+    res.set('Expires', '0');
+
     return res.status(200).json({
         message:'food items fetched successfully',
         foodItems
